@@ -1,0 +1,34 @@
+# Created by Penguin (c) 2017
+# For addon Stargate Carter Addon Pack
+@name SG Chevron Sounds (Riley)
+@model models/bull/various/speaker.mdl
+@inputs SG:wirelink
+interval(70)
+
+if(changed(SG:stargateActive())){if(SG:stargateActive()&SG){timer("1",900)}}
+
+if(changed(SG:stargateGetWire("Chevron"))){
+    if(SG:stargateGetWire("Chevron")==1){soundPlay(0,2000,"alexalx/stargate/riley/bad/c1_lock.mp3") timer("2",900)}
+    if(SG:stargateGetWire("Chevron")==2){soundPlay(0,2000,"alexalx/stargate/riley/bad/c2_lock.mp3") timer("3",900)}
+    if(SG:stargateGetWire("Chevron")==3){soundPlay(0,2000,"alexalx/stargate/riley/c3_lock.mp3") timer("4",900)}
+    if(SG:stargateGetWire("Chevron")==4){soundPlay(0,2000,"alexalx/stargate/riley/bad/c4_lock.mp3") timer("5",900)}
+    if(SG:stargateGetWire("Chevron")==5){soundPlay(0,2000,"alexalx/stargate/riley/bad/c5_lock.mp3") timer("6",900)}
+    if(SG:stargateGetWire("Chevron")==6){soundPlay(0,2000,"alexalx/stargate/riley/bad/c6_lock.mp3") timer("7",900)}
+    if(SG:stargateGetWire("Chevron")==7){soundPlay(0,2000,"alexalx/stargate/riley/bad/c7_lock.mp3") if(!SG:stargateGetWire("Chevron Locked")){timer("8",900)}}
+    if(SG:stargateGetWire("Chevron")==8){soundPlay(0,2000,"alexalx/stargate/riley/c8_lock.mp3") if(!SG:stargateGetWire("Chevron Locked")){timer("9",900)}}
+    if(SG:stargateGetWire("Chevron")==9){soundPlay(0,2000,"alexalx/stargate/riley/bad/c9_lock.mp3")}
+    if(SG:stargateGetWire("Chevron")==-7){soundPlay(0,2000,"stargate/walter/c7_failed.mp3")}
+    if(SG:stargateGetWire("Chevron")==-8){soundPlay(0,2000,"alexalx/stargate/riley/bad/c8_failed.mp3")}
+    if(SG:stargateGetWire("Chevron")==-9){soundPlay(0,2000,"alexalx/stargate/riley/c9_failed.mp3")}
+}
+if(SG:stargateActive()){
+    if(clk("1")){soundPlay(0,2000,"alexalx/stargate/riley/c1_encoded.mp3")}
+    if(clk("2")){soundPlay(0,2000,"alexalx/stargate/rodney/c2_encoded.mp3")}
+    if(clk("3")){soundPlay(0,2000,"alexalx/stargate/rodney/c3_encoded.mp3")}
+    if(clk("4")){soundPlay(0,2000,"alexalx/stargate/riley/c4_encoded.mp3")}
+    if(clk("5")){soundPlay(0,2000,"alexalx/stargate/rodney/c5_encoded.mp3")}
+    if(clk("6")){soundPlay(0,2000,"alexalx/stargate/riley/c6_encoded.mp3")}
+    if(clk("7")){soundPlay(0,2000,"alexalx/stargate/riley/c7_encoded.mp3")}
+    if(clk("8")){soundPlay(0,2000,"alexalx/stargate/riley/c8_encoded.mp3")}
+    if(clk("9")){soundPlay(0,2000,"alexalx/stargate/riley/c9_encoded.mp3")}
+}

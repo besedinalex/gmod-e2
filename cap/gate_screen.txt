@@ -1,0 +1,557 @@
+# Created by Penguin in 2016
+# Revised in 2024
+# For addon Stargate Carter Addon Pack
+
+@name Penguin's Stargate Control
+# Shared
+@inputs EGP:wirelink SG:wirelink
+@persist Drew:number StargateType:number
+# Stargate Universe exclusive
+@inputs DestinyTimer:wirelink
+@persist SymSGU:string
+
+# Init
+interval(16) # ~60 FPS
+if (first() || dupefinished() || ~EGP || ~SG || changed(SG:entity():type()) || ~DestinyTimer) {
+    EGP:egpClear()
+    Drew = 0
+    if (DestinyTimer) {
+        DestinyTimer["Minutes", number] = 1
+        DestinyTimer["Seconds", number] = 30
+        DestinyTimer["Auto Start", number] = 1
+        DestinyTimer["Auto Reset", number] = 1
+        DestinyTimer["Auto Close", number] = 1
+        DestinyTimer["Normal Font", number] = 0
+        DestinyTimer["Disable Use", number] = 1
+    }
+}
+
+if (!Drew & EGP) {
+    AncientFont = "Anquietas"
+    ##### Core layout #####
+
+    # Box and Name
+    EGP:egpBox(1, vec2(256, 256), vec2(505, 505))
+    EGP:egpColor(1, vec(0, 0, 0))
+    EGP:egpAlpha(1,200)
+    EGP:egpBoxOutline(2, vec2(256, 256), vec2(512, 512))
+    EGP:egpSize(2, 4)
+    EGP:egpBoxOutline(3, vec2(255, 20), vec2(195, 40))
+    EGP:egpText(4, "Stargate Control", vec2(167, 8))
+    EGP:egpSize(4, 25)
+
+    # Chevron Numbers
+    for (I = 0,8) {
+        A = I*40
+        EGP:egpText(5+I, toString(I+1), vec2(10, 110+A))
+        EGP:egpSize(5+I, 35)
+    }
+    EGP:egpAlpha(12, 0)
+    EGP:egpAlpha(13, 0)
+
+    # Stargate Status
+    EGP:egpBoxOutline(14, vec2(320, 460), vec2(200, 50))
+    EGP:egpText(26, "", vec2(320, 464))
+    EGP:egpAlign(26, 1, 1)
+    EGP:egpFont(26, AncientFont)
+    EGP:egpSize(26, 39)
+
+    # Stargate Horizon
+    GateCenter=vec2(320, 250)
+    EGP:egpCircle(15, GateCenter, vec2(139, 139))
+    EGP:egpAlpha(15, 0)
+
+    # Chevron Boxes
+    EGP:egpBoxOutline(16, vec2(45, 250), vec2(85, 285))
+    for (I = 0,8) {
+        A = I*40
+        EGP:egpBoxOutline(17+I, vec2(60, 130+A), vec2(45, 35))
+    }
+    EGP:egpAlpha(24,0)
+    EGP:egpAlpha(25,0)
+    for (I = 0,6) {
+        A = I*40
+        EGP:egpBox(223+I, vec2(60, 130+A), vec2(45, 35))
+        EGP:egpColor(223+I, vec(255, 0, 0))
+        EGP:egpAlpha(223+I, 0)
+    }
+
+    # Overload Status
+    EGP:egpBox(363, vec2(320, 250), vec2(115, 75))
+    EGP:egpColor(363, vec(0, 0, 0))
+    EGP:egpAlpha(363, 0)
+    EGP:egpBoxOutline(364, vec2(320, 250), vec2(115, 75))
+    EGP:egpColor(364, vec(255, 0, 0))
+    EGP:egpSize(364, 3)
+    EGP:egpAlpha(364, 0)
+    EGP:egpText(365, "00:00", vec2(320, 268))
+    EGP:egpAlign(365, 1, 1)
+    EGP:egpSize(365, 45)
+    EGP:egpFont(365, AncientFont)
+    EGP:egpAlpha(365, 0)
+    EGP:egpText(366, "Danger", vec2(320, 233))
+    EGP:egpAlign(366, 1, 1)
+    EGP:egpSize(366, 30)
+    EGP:egpFont(366, AncientFont)
+    EGP:egpAlpha(366, 0)
+
+    ##### Stargate layout #####
+    function vector2 pol2pt(Point:vector2, Origin:vector2) {
+        X = Point:x() * cos(Point:y()) + Origin:x()
+        Y = Point:x() * sin(Point:y()) + Origin:y()
+        return vec2(X, Y)
+    }
+    Classes = array("stargate_sg1", "stargate_infinity", "stargate_movie", "stargate_atlantis", "stargate_universe")
+    for (I = 1,5) {
+        if (SG:entity():type() != Classes[I, string]) {
+            continue
+        }
+        if (I < 4) { # SG-1
+            StargateType = 1
+            Font = "Stargate Address Glyphs SG1"
+            # Chevrons in boxes
+            for (I = 0,8) {
+                A = I*40
+                EGP:egpText(27+I, "", vec2(60, 131+A))
+                EGP:egpFont(27+I, Font)
+                EGP:egpSize(27+I, 29)
+                EGP:egpAlign(27+I, 1, 1)
+            }
+
+            # Current dialing symbol
+            EGP:egpText(36, "", vec2(321, 254))
+            EGP:egpSize(36, 50)
+            EGP:egpFont(36, Font)
+            EGP:egpAlign(36, 1, 1)
+
+            # Stargate
+            GateRad=165
+            for (I = 0,2) {
+                EGP:egpCircleOutline(37+I, GateCenter, vec2(GateRad, GateRad))
+                EGP:egpSize(37+I, 8)
+                EGP:egpFidelity(37+I, 36)
+                EGP:egpAngle(37, 36)
+                EGP:egpColor(37+I, vec(120, 120, 120))
+            }
+            for (I = 0,1) {
+                EGP:egpCircleOutline(40+I, GateCenter, vec2(GateRad-25, GateRad-25))
+                EGP:egpSize(40+I, 2)
+                EGP:egpFidelity(40+I, 36)
+                EGP:egpAngle(41, 36)
+                EGP:egpColor(40+I, vec(120, 120, 120))
+            }
+            SymSG1 = !SG["Earth Point of Origin", number] ? "0JKNTR3MBZX*H69IGPL#@QFS1E4AU85OCW72YVD?" : "0JKNTR3MBZX*H69IGPL?@QFS1E4AU85OCW72YVD#"
+            for (I = 0,39) {
+                LAng = (I+1) * 360 / 40
+                EGP:egpText(233+I, SymSG1[I+1], pol2pt(vec2(GateRad-15, LAng-90.35), vec2(0, 0)))
+                EGP:egpParent(233+I, 38)
+                EGP:egpSize(233+I, 15)
+                EGP:egpColor(233+I, vec(120, 120, 120))
+                EGP:egpAlign(233+I, 1, 1)
+                EGP:egpFont(233+I, Font)
+            }
+            for (I = 0,19) {
+                EGP:egpAngle(233+I, -I*9.5)
+            }
+            for (I = 0,17) {
+                EGP:egpAngle(253+I, 170-I*8.5)
+            }
+            EGP:egpAngle(252,180)
+            for (I = 1,40) {
+                LAng = I * 360 / 40
+                EGP:egpLine(60+I, pol2pt(vec2(GateRad, -94.6+LAng), vec2(0, 0)), pol2pt(vec2(GateRad-25, -94.6+LAng), vec2(0, 0)))
+                EGP:egpParent(60+I, 38)
+                EGP:egpSize(60+I, 3)
+                EGP:egpColor(60+I, vec(120, 120, 120))
+            }
+            for (I = 0,8) {
+                ChAng = I * 360 / 9
+                EGP:egpPoly(42+I, pol2pt(vec2(GateRad+5, -94+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad-18, -90+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad+5, -86+ChAng), vec2(0, 0)))
+                EGP:egpParent(42+I, 39)
+                EGP:egpColor(42+I, vec(97, 77, 25))
+                EGP:egpTriangleOutline(51+I, pol2pt(vec2(GateRad+5, -94+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad-18, -90+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad+5, -86+ChAng), vec2(0, 0)))
+                EGP:egpParent(51+I, 39)
+                EGP:egpSize(51+I, 2)
+                EGP:egpColor(51+I, vec(120, 120, 120))
+            }
+        } elseif (I == 4) { # Atlantis
+            StargateType = 2
+            Font = "Stargate Address Glyphs Atl"
+            # Chevrons in boxes
+            for (I = 0,8) {
+                T = (I+1) * 40
+                EGP:egpText(27+I, "", vec2(60, 90+T))
+                EGP:egpFont(27+I, Font)
+                EGP:egpSize(27+I, 29)
+                EGP:egpAlign(27+I, 1, 1)
+            }
+
+            # Dialing Symbol
+            EGP:egpText(36, "", vec2(321, 254))
+            EGP:egpSize(36, 50)
+            EGP:egpFont(36, Font)
+            EGP:egpAlign(36, 1, 1)
+
+            # Stargate
+            EGP:egpColor(1, vec(0, 0, 50))
+            GateRad=165
+            for (I = 0,1) {
+                EGP:egpCircleOutline(101+I, GateCenter, vec2(GateRad-25, GateRad-25))
+                EGP:egpFidelity(101+I, 36)
+                EGP:egpSize(101+I, 2)
+                EGP:egpColor(101+I, vec(100, 100, 100))
+                EGP:egpCircleOutline(103+I, GateCenter, vec2(GateRad, GateRad))
+                EGP:egpFidelity(103+I, 36)
+                EGP:egpAngle(104, 36)
+                EGP:egpSize(103+I, 8)
+                EGP:egpColor(103+I, vec(100, 100, 100))
+                EGP:egpCircleOutline(105+I, GateCenter, vec2(GateRad-13, GateRad-13))
+                EGP:egpFidelity(105+I, 36)
+                EGP:egpAngle(106, 36)
+                EGP:egpSize(105+I, 22)
+                EGP:egpColor(105+I, vec(0, 0, 90))
+            }
+            SymSGA="8UG967KVZNR0#JPSXCDF1HATE2LMQYB3OIW@54"
+            for (I = 0,35) {
+                LAng = (I+1) * 360 / 36
+                EGP:egpText(273+I, SymSGA[I+1], pol2pt(vec2(GateRad-12.5, -90.5+LAng), vec2(0, 0)))
+                EGP:egpParent(273+I, 101)
+                EGP:egpSize(273+I, 15)
+                EGP:egpColor(273+I, vec(0, 0, 120))
+                EGP:egpAlign(273+I, 1, 1)
+                EGP:egpFont(273+I, Font)
+            }
+            for (I = 0,17) {
+                EGP:egpAngle(273+I, -I*10.5)
+            }
+            for (I = 0,17) {
+                EGP:egpAngle(290+I, 170-I*9)
+            }
+            for (I = 0,8) {
+                ChAng = I * 360 / 9
+                EGP:egpPoly(107+I, pol2pt(vec2(GateRad+5, -94+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad-18, -90+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad+5, -86+ChAng), vec2(0, 0)))
+                EGP:egpParent(107+I, 101)
+                EGP:egpColor(107+I, vec(0, 0, 90))
+                EGP:egpTriangleOutline(153+I, pol2pt(vec2(GateRad+5, -94+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad-18, -90+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad+5, -86+ChAng), vec2(0, 0)))
+                EGP:egpParent(153+I, 101)
+                EGP:egpColor(153+I, vec(100, 100, 100))  
+                EGP:egpSize(153+I, 2)
+            }
+            for (I = 1,36) {
+                LAng = I * 360 / 36
+                EGP:egpLine(116+I, pol2pt(vec2(GateRad, -95.2+LAng), vec2(0, 0)), pol2pt(vec2(GateRad-25, -95.2+LAng), vec2(0, 0)))
+                EGP:egpParent(116+I, 101)
+                EGP:egpColor(116+I, vec(100, 100, 100))
+                EGP:egpSize(116+I, 3)
+            }
+        } elseif (I == 5) { # Universe
+            StargateType = 3
+            Font = "Stargate Address Glyphs U"
+            # Chevrons in boxes
+            for (I = 0,8) {
+                T = I * 40
+                EGP:egpText(27+I, "", vec2(60, 129+T))
+                EGP:egpFont(27+I, Font)
+                EGP:egpSize(27+I, 65)
+                EGP:egpAngle(27+I, -90)
+                EGP:egpAlign(27+I, 1, 1)
+            }
+
+            # Dialing Symbol
+            EGP:egpText(36, "", vec2(319, 249))
+            EGP:egpSize(36, 130)
+            EGP:egpFont(36, Font)
+            EGP:egpAlign(36, 1, 1)
+
+            # Stargate
+            GateRad = 170
+            RingAng = 0
+            EGP:egpCircle(15, GateCenter, vec2(GateRad-32, GateRad-32))
+            EGP:egpCircleOutline(165, GateCenter, vec2(GateRad-30, GateRad-30))
+            EGP:egpColor(165, vec(75, 75, 75))
+            EGP:egpCircleOutline(166, GateCenter, vec2(GateRad-31, GateRad-31))
+            EGP:egpCircleOutline(167, GateCenter, vec2(GateRad, GateRad))
+            EGP:egpSize(167, 3)
+            EGP:egpFidelity(167, 36)
+            EGP:egpCircleOutline(168, GateCenter, vec2(GateRad, GateRad))
+            EGP:egpSize(168, 3)
+            EGP:egpAngle(168, 46)
+            EGP:egpFidelity(168, 36)
+            for (I = 0,8) {
+                ChAng = I * 360 / 9
+                EGP:egpPoly(169+I, pol2pt(vec2(GateRad+2.9, -95+RingAng+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad-12, -90+RingAng+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad+2.9, -85+RingAng+ChAng), vec2(0, 0))) 
+                EGP:egpColor(169+I, vec(75, 75, 75))
+                EGP:egpParent(169+I, 165)
+                EGP:egpLine(354+I, pol2pt(vec2(GateRad-8, -90+RingAng+ChAng), vec2(0, 0)), pol2pt(vec2(GateRad-30.5, -89.75+RingAng+ChAng), vec2(0, 0)))
+                EGP:egpColor(354+I, vec(75, 75, 75))
+                EGP:egpParent(354+I, 165)
+                EGP:egpSize(354+I, 3)
+            }
+            for (I = 0,44) {
+                if (I % 5) {
+                    SAng = I * 360 / 45
+                    V1 = pol2pt(vec2(GateRad-30, -93+RingAng+SAng), vec2(0, 0))
+                    V2 = pol2pt(vec2(GateRad-9, -93+RingAng+SAng), vec2(0, 0))
+                    V3 = pol2pt(vec2(GateRad-7, -92+RingAng+SAng), vec2(0, 0))
+                    V4 = pol2pt(vec2(GateRad-6, -90+RingAng+SAng), vec2(0, 0))
+                    V5 = pol2pt(vec2(GateRad-7, -88+RingAng+SAng), vec2(0, 0))
+                    V6 = pol2pt(vec2(GateRad-9, -87+RingAng+SAng), vec2(0, 0))
+                    V7 = pol2pt(vec2(GateRad-30, -87+RingAng+SAng), vec2(0, 0))
+                    EGP:egpLineStrip(178+I, V1, 60+I, V2, 60+I, V3, V4, V5, V6, V7) 
+                    EGP:egpColor(178+I, vec(75, 75, 75))
+                    EGP:egpParent(178+I, 165)
+                }
+            }
+            SymSGU = " ZB9J QNLM VKO6 DCWY #R@S 8APU T7H5 4IG0 12E3"
+            for (I = 0,44) {
+                LAng = I * 360 / 45
+                EGP:egpText(309+I, SymSGU[I+1], pol2pt(vec2(GateRad-18, -90+LAng), vec2(0, 0)))
+                EGP:egpParent(309+I, 165)
+                EGP:egpSize(309+I, 32)
+                EGP:egpColor(309+I, vec(75, 75, 75))
+                EGP:egpAlign(309+I, 1, 1)
+                EGP:egpFont(309+I, Font)
+            }
+            for (I = 0,22) {
+                EGP:egpAngle(309+I, -I*7.9)
+            }
+            for (I = 0,22) {
+                EGP:egpAngle(332+I, 175-I*8.1)
+            }
+            
+            # Destiny Timer
+            EGP:egpBoxOutline(367, vec2(45, 70), vec2(88, 50))
+            EGP:egpAlpha(367, 0)
+            EGP:egpText(368, "Destiny Timer", vec2(6, 45))
+            EGP:egpSize(368, 13)
+            EGP:egpAlpha(368, 0)
+            EGP:egpText(369, "00:00", vec2(5, 62))
+            EGP:egpSize(369, 37)
+            EGP:egpFont(369, AncientFont)
+            EGP:egpAlpha(369, 0)
+        } else {
+            StargateType = 0
+        }
+    }
+    Drew = 1
+}
+
+if (SG & EGP) {
+    # Get latest values
+    Active = SG:stargateGetWire("Active")
+    Open = SG:stargateGetWire("Open")
+    Inbound = SG:stargateGetWire("Inbound")
+    Chevron = SG:stargateGetWire("Chevron")
+    Chevrons = SG:stargateGetWireString("Chevrons")
+    DialingSymbol = SG:stargateGetWireString("Dialing Symbol")
+    DialingAddress = SG:stargateGetWireString("Dialing Address")
+    Unstable = SG:stargateUnstable()
+    Iris = SG:stargateIrisActive()
+    Ring = SG:stargateGetRingAngle()
+    Glyph = SG:stargateGetWire("Active Glyph")
+    Overload=SG:stargateOverload()
+    OverloadTime=SG:stargateOverloadTime()
+        
+    # Chevron boxes
+    if (changed(Chevron)) {
+        if (!Inbound) {
+            for (I = 0,6) {
+                EGP:egpAlpha(223+I, 0)
+            }
+            if (Chevron == -7 || (DialingAddress:length() >= 0 & DialingAddress:length() < 7) || (DialingAddress:length() == 7 & DialingAddress[7] == "#")) {
+                EGP:egpBoxOutline(16, vec2(45, 250), vec2(85, 285))
+                EGP:egpAlpha(12, 0)
+                EGP:egpAlpha(13, 0)
+                EGP:egpAlpha(24, 0)
+                EGP:egpAlpha(25, 0)
+            } elseif (Chevron == -8 || (DialingAddress:length() == 7 & DialingAddress[7] != "#") || (DialingAddress:length() == 8 & DialingAddress[8] == "#")) {
+                EGP:egpBoxOutline(16, vec2(45, 270), vec2(85, 325))
+                EGP:egpAlpha(12, 255)
+                EGP:egpAlpha(13, 0)
+                EGP:egpAlpha(24, 255)
+                EGP:egpAlpha(25, 0)
+            } elseif (Chevron == -9 || (DialingAddress:length() == 8 & DialingAddress[8] != "#") || DialingAddress:length() == 9) {
+                EGP:egpBoxOutline(16, vec2(45, 290), vec2(85, 365))
+                EGP:egpAlpha(12, 255)
+                EGP:egpAlpha(13, 255)
+                EGP:egpAlpha(24, 255)
+                EGP:egpAlpha(25, 255)
+            }
+        } else {
+            for (I = 0,6) {
+                EGP:egpAlpha(223+I, 255)
+            }
+        }
+    }
+
+    # Stargate chevrons
+    if (changed(Chevrons)) {
+        if (StargateType == 1) { # SG-1
+            ChevronIDs = array(43, 44, 45, 48, 49, 50, 42, 46, 47)
+            for (I = 1,9) {
+                EGP:egpColor(ChevronIDs[I, number], Chevrons[I] == "1" ? vec(255, 93, 0) : vec(97, 77, 25))
+            }
+        } elseif (StargateType == 2) { # Atlantis
+            ChevronIDs = array(108, 109, 110, 113, 114, 115, 107, 111, 112)
+            for (I = 1,9) {
+                EGP:egpColor(ChevronIDs[I, number], Chevrons[I] == "1" ? vec(0, 0, 255) : vec(0, 0, 90))
+            }
+        }
+    }
+
+    if (changed(DialingAddress) & !Inbound) {
+        # Chevrons in boxes
+        for (I = 0,8) {
+            EGP:egpSetText(27+I, DialingAddress ? (StargateType == 1 & DialingAddress[I+1] == "#") ? "?" : (StargateType == 1 & DialingAddress[I+1] == "?") ? "#" : DialingAddress[I+1] : " ")
+        }
+        # Stargate Universe lights
+        if (StargateType == 3) {
+            for (I = 0,44) {
+                if (I % 5) {
+                    EGP:egpColor(178+I, vec(75, 75, 75))
+                    EGP:egpColor(309+I, vec(75, 75, 75))
+                }
+            }
+            for (I = 1, DialingAddress:length()) {
+                Sy = SymSGU:find(DialingAddress[I]) 
+                if (Sy) {
+                    Sy -= 1
+                    EGP:egpColor(178+Sy, vec(255, 255, 255))
+                    EGP:egpColor(309+Sy, vec(255, 255, 255))
+                }
+            }
+        }
+    }
+
+    # Dialing symbol
+    if (changed(DialingSymbol)) {
+        EGP:egpSetText(36, DialingSymbol ?
+            (StargateType == 1 & DialingSymbol == "#") ? "?" : (StargateType == 1 & DialingSymbol == "?")
+            ? "#" : DialingSymbol : " ")
+    }
+
+    # Kawoosh color
+    if (!Iris || StargateType == 3) {
+        if (!Open) {
+            EGP:egpAlpha(15, 0)
+        } else {
+            EGP:egpAlpha(15, 255)
+            EGP:egpColor(15, !Unstable ? StargateType == 3 ? vec(110,110,110) : vec(0,0,175) : vec(75,75,75))
+        }
+    } else {
+        EGP:egpAlpha(15, 255)
+        EGP:egpColor(15, StargateType == 1 ? vec(170, 170, 170) : vec(100,100,255))
+    }
+
+    # Rotating body
+    if ((StargateType == 1 || StargateType == 3) & changed(Ring)) {
+        EGP:egpAngle(StargateType == 1 ? 38 : 165, Ring)
+    }
+
+    # Stargate Atlantis lights
+    if (StargateType == 2 & (changed(Glyph) || changed(Open) || changed(Active))) {
+        if (Active) {
+            if (Inbound) {
+                if (!Open) {
+                    EGP:egpColor(272+Glyph, vec(200, 200, 255))
+                } else {
+                    for (I = 0,35) {
+                        EGP:egpColor(273+I, vec(200, 200, 255))
+                    }
+                }
+            } else {
+                for (I = 0,35) {
+                    EGP:egpColor(273+I, vec(0, 0, 120))
+                }
+                EGP:egpColor(272+Glyph, vec(200, 200, 255))
+            }
+            ChevronIDs = array(276, 280, 284, 296, 300, 304, 308, 288, 292)
+            for (I = 1,9) {
+                if (Chevrons[I] == "1") {
+                    EGP:egpColor(ChevronIDs[I, number], vec(200, 200, 255))
+                }
+            }
+        } else {
+            for (I = 0,35) {
+                EGP:egpColor(273+I, vec(0, 0, 120))
+            }
+        }
+    }
+
+    # Universe
+    if (StargateType == 3) {
+        # Stargate Lights
+        if (changed(Active)) {
+            Vector = Active ? vec(255, 255, 255) : vec(75, 75, 75)
+            for (I = 0,8) {
+                EGP:egpColor(169+I, Vector)
+                EGP:egpColor(354+I, Vector)
+            }
+        }
+        # Destiny Timer
+        if (DestinyTimer) {
+            if (Open) {
+                Minutes = DestinyTimer["Minutes", number]
+                Seconds = DestinyTimer["Seconds", number]
+                EGP:egpSetText(369, format("%02d:%02d", Minutes, Seconds))
+                EGP:egpColor(369, Minutes == 0 & Seconds <= 10 ? vec(255, 0, 0) : vec(255, 255, 255))
+            }
+            if (changed(Open)) {
+                Alpha = Open ? 255 : 0
+                for (I = 367,369) {
+                    EGP:egpAlpha(I, Alpha)
+                }
+            }
+        }
+    }
+
+    # Overload status
+    if (changed(OverloadTime)) {
+        if (OverloadTime <= 0) {
+            OverloadSec = "00"
+            OverloadMin = "00"
+        } else {
+            OverloadSec = toString(OverloadTime % 60)
+            if (OverloadSec:length() == 1) {
+                OverloadSec = "0" + OverloadSec
+            }
+            OverloadMin = toString(floor(OverloadTime / 60))
+            if (OverloadMin:length() == 1) {
+                OverloadMin = "0" + OverloadMin
+            }
+        }
+        EGP:egpSetText(365, OverloadMin + ":" + OverloadSec)
+    }
+    if (changed(Overload)) {
+        Alpha = Overload ? 255 : 0
+        for (I = 0,4) {
+            EGP:egpAlpha(363+I, Alpha)
+        }
+    }
+
+    # Status changes
+    if (StargateType > 0) {
+        if (Chevron == -7 || Chevron == -8 || Chevron == -9) {
+            EGP:egpSetText(26, "Fail")
+            EGP:egpColor(26, vec(255, 0, 0))
+        } elseif (!Active) {
+            EGP:egpSetText(26, "Unactive")
+            EGP:egpColor(26, vec(255, 255, 255))
+        } elseif (Inbound) {
+            EGP:egpSetText(26, "Incoming")
+            EGP:egpColor(26, vec(255, 0, 0))
+        } elseif (!Open) {
+            EGP:egpSetText(26, "Dialing")
+            EGP:egpColor(26, vec(255, 255, 0))
+        } else {
+            EGP:egpSetText(26, "Open")
+            EGP:egpColor(26, vec(0, 255, 0))
+        } 
+    } else {
+        EGP:egpSetText(26, "Unknown")
+        EGP:egpColor(26, vec(255, 0, 0))
+    }
+} else {
+    EGP:egpSetText(26, "Disconnected")
+    EGP:egpColor(26, vec(255, 0, 0))
+}
